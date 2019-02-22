@@ -72,7 +72,7 @@ $apiResponse.Content | ConvertFrom-Json | select -expand WMT
 
 When the access token expires, you can fetch a new one via the refresh token without having to log in again.
 
-You can look for the following response to any API call to determine your token as expired:
+You can look for the following response to any API call to determine your token is expired:
 
 > { "error":"The access token being passed has expired or is invalid." }
 
