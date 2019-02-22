@@ -19,16 +19,18 @@ From a PowerShell prompt, dot source the file and then you can begin calling fun
 ```
 
 ### Register an app
+
 Return a new OAuth User Id for use when creating a new app on the TD Ameritrade developer website.  You can skip this step and use an existing user id if you have already
 
 ```powershell
 New-TdUserId
-# Example response: A265B038D9C0
 ```
+
+> A265B038D9C0
 
 Register an app with the following values
 
-* Application name: anyting you want
+* Application name: anything you want
 * Description: anything you want
 * User Id: use the response from `New-TdUserId`.  For example, `A265B038D9C0`
 * Redirect URL: `https://localhost:8080/` (I will make this configurable in the future.)
@@ -45,17 +47,18 @@ After successful login, the page will redirect to https://localhost:8080 which i
 
 ![redirect page screenshot](/docs/redirect.png)
 
-Your bearer token is now accessible in `$response.access_token`.
+```powershell
+$accessToken = $response.access_token
+$refreshToken = $response.refresh_token
+```
 
-Your refresh token is now accessible in `$response.refresh_token`.
-
-You may want to save these somewhere easily accessible in the future for your program/automated scripts to use without requiring user interactivity.  Perhaps to an encrypted file via `ConvertFrom-SecureString` and `Set-Content`.
+You may want to save these tokens somewhere easily accessible in the future for your program/automated scripts to use without requiring user interactivity.  Perhaps to an encrypted file via `ConvertFrom-SecureString` and `Set-Content`.
 
 ### Call TD Ameritrade API
 
 ```powershell
 # query Walmart (WMT) stock quote
-$apiResponse = Invoke-WebRequest "https://api.tdameritrade.com/v1/marketdata/WMT/quotes" -Headers @{Authorization="Bearer $($response.access_token)"}
+$apiResponse = Invoke-WebRequest "https://api.tdameritrade.com/v1/marketdata/WMT/quotes" -Headers @{Authorization="Bearer $accessToken"}
 
 # format the info
 $apiResponse.Content | ConvertFrom-Json | select -expand WMT
@@ -69,4 +72,15 @@ $apiResponse.Content | ConvertFrom-Json | select -expand WMT
 
 When the access token expires, you can fetch a new one via the refresh token without having to log in again.
 
-TODO: finish refresh token code and doc
+You can look for the following response to any API call to determine your token as expired:
+
+> { "error":"The access token being passed has expired or is invalid." }
+
+Fetch a new access_token with a previously saved refresh token:
+
+```powershell
+$response = New-TdAuthorizationToken -RefreshToken $refreshToken -RedirectUrl "https://localhost:8080/" -ClientId "A265B038D9C0"
+$accessToken = $response.access_token
+```
+
+Now your access token is reset and you are ready to make more API calls.
