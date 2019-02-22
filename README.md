@@ -79,7 +79,7 @@ You can look for the following response to any API call to determine your token 
 Fetch a new access_token with a previously saved refresh token:
 
 ```powershell
-$response = New-TdAuthorizationToken -RefreshToken $refreshToken -RedirectUrl "https://localhost:8080/" -ClientId "A265B038D9C0"
+$response = New-TdAuthorizationToken -RefreshToken $refreshToken -ClientId "A265B038D9C0"
 $accessToken = $response.access_token
 ```
 
